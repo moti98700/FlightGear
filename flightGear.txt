@@ -1,0 +1,3 @@
+var h0 = 5
+var jk = h0 +5
+print jk
