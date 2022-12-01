@@ -1,11 +1,19 @@
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <string.h>
+#include <iostream>
 #include "Client.hpp"
+
+using namespace std;
+
 Client *Client::instance = 0;
 Client *Client::getInstance()
 {
-	if (!instance) instance = new Client();
+	if (!instance)
+		instance = new Client();
 	return instance;
 }
-
 
 void Client::Connect(int port, const char *ip)
 {
@@ -28,12 +36,18 @@ void Client::Connect(int port, const char *ip)
 	{
 		cout << "Connection Failed" << endl;
 	}
-	else cout << "Connection Established" << endl;
+	else
+		cout << "Connection Established" << endl;
 }
 
-void Client::Send(char *command)
+void Client::Send(char const *command)
 {
-	send(sock, command, strlen(command), 0);
+	auto len = strlen(command);
+	auto s = send(sock, command, len, 0);
+	if (s != len)
+	{
+		std::cout << "The send failed";
+	}
 	char buffer[4096] = {0};
 	read(sock, buffer, 4096);
 }
