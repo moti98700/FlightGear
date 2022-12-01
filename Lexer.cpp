@@ -1,4 +1,7 @@
 #include "Lexer.hpp"
+#include <fstream>
+
+using namespace std;
 
 Lexer *Lexer::instance = 0;
 Lexer *Lexer::getInstance()
@@ -12,9 +15,9 @@ vector<vector<string>> Lexer::getAllLinesSplitByWord()
     return allLinesSplitByWord;
 }
 
-void Lexer::readTextFile(string path)
+void Lexer::readTextFile(const string &path)
 {
-    vector<string>allLines;
+    vector<string> allLines;
     string line;
     ifstream file;
     file.open(path);
@@ -26,11 +29,12 @@ void Lexer::readTextFile(string path)
     for (int i = 0; i < allLines.size(); i++)
     {
 
-        splitLineByWord(allLines[i]);
+        vector<string> linvect = splitLineByWord(allLines[i]);
+        allLinesSplitByWord.push_back(linvect);
     }
 }
 
-void Lexer::splitLineByWord(string line)
+vector<string> Lexer::splitLineByWord(string &line)
 {
     while (line[0] == ' ')
     {
@@ -51,5 +55,5 @@ void Lexer::splitLineByWord(string line)
         }
     }
     lineSplitByWord.push_back(word);
-    allLinesSplitByWord.push_back(lineSplitByWord);
+    return lineSplitByWord;
 }
