@@ -1,12 +1,3 @@
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <string.h>
-#include <iostream>
-
-
-using namespace std;
-
 class Client
 {
 private:
@@ -16,5 +7,5 @@ private:
 public:
     static Client *getInstance();
     void Connect(int port, const char *ip);
-    void Send(char *command);  
+    void Send(const char *command);  
 };
