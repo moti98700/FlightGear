@@ -1,71 +1,45 @@
 #include <vector>
-#include <iostream>
-#include "Server.hpp"
-#include "Client.hpp"
+#include <string>
+#include "ABCCommands.hpp"
+#include "CalculateExpression.hpp"
 
-using namespace std;
-
-
-class Command
+class OpenServerCommand : public Command
 {
 public:
-    virtual void doCommand(const vector<string> &line, int i) = 0;
-    double getVarValue(string var);
-    virtual int get_i(int i){return i;}
-    void mathematicalExpression(const vector<string> &line,int size,string &mathematicalExpres);
-
+    int doCommand(const std::vector<std::string> &line, int i);
 };
 
-class openServerCommand : public Command
+class ConnectCommand : public Command
 {
 public:
-    void doCommand(const vector<string> &line, int i);
+    int doCommand(const std::vector<std::string> &line, int i);
 };
 
-class connectCommand : public Command
+class VarCommand : public Command, public CalculateExpression
 {
 public:
-    void doCommand(const vector<string> &line, int i);
+    int doCommand(const std::vector<std::string> &line, int i);
 };
 
-class varCommand : public Command
+class SetCommand : public Command, public CalculateExpression
 {
 public:
-    void doCommand(const vector<string> &line, int i);
-    bool checkIfPathIsValid(string varPath);
+    int doCommand(const std::vector<std::string> &line, int i);
 };
 
-class setCommand : public Command
+class PrintCommand : public Command, public CalculateExpression
 {
 public:
-    void doCommand(const vector<string> &line, int i);
+    int doCommand(const std::vector<std::string> &line, int i);
 };
-   
-class printCommand : public Command
+class SleepCommand : public Command
 {
 public:
-    void doCommand(const vector<string> &line, int i);
-};
-
-class whileCommand : public Command
-{
-
-public:
-    void doCommand(const vector<string> &line, int i);
-    int numberLineOfElementInTextFile(const vector<vector<string>>&allLinesSplitByWord,string element,int i);
-    bool checkCondition(double x, string op, string yString);
-    static int sizeLoop ;
-    int get_i(int i){return i + 1 + sizeLoop;}
-};   
-
-class sleepCommand : public Command
-{
-public:
-    void doCommand(const vector<string> &line, int i);
+    int doCommand(const std::vector<std::string> &line, int i);
 };
 
-class unknownCommand : public Command
+class UnknownCommand : public Command
 {
 public:
-    void doCommand(const vector<string> &line, int i);
+    int doCommand(const std::vector<std::string> &line, int i);
 };
