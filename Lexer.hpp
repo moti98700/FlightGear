@@ -1,25 +1,16 @@
-
-#include <iostream>
 #include <vector>
 #include <string>
-#include <fstream>
-#include <unistd.h>
-#include "Parser.hpp"
-
-using namespace std;
 
 class Lexer
 {
 private:
     Lexer() {}
     static Lexer *instance;
-    vector<vector<string>>allLinesSplitByWord;
-    void splitLineByWord(string line);
+    std::vector<std::vector<std::string>> allLinesSplitByWord;
+    std::vector<std::string> splitLineByWord(std::string &line);
+
 public:
-    void readTextFile(string path);
-    static Lexer *getInstance(); 
-    vector<vector<string>>getAllLinesSplitByWord();
+    void readTextFile(const std::string &path);
+    static Lexer *getInstance();
+    std::vector<std::vector<std::string>> getAllLinesSplitByWord();
 };
-  
-    
-    
