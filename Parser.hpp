@@ -1,14 +1,14 @@
-#include <unordered_map>
-#include "Database.hpp"
-
-using namespace std;
+#include <vector>
+#include <string>
 
 class Parser
 {
 private:
-    Parser() {Database::getInstance();}
+    Parser();
     static Parser *instance;
+
 public:
-    int parsing(const vector<string>&line,int i);
-    static Parser *getInstance(); 
-}; 
+    void ran();
+    int parsing(const std::vector<std::string> &line, int i);
+    static Parser *getInstance();
+};
