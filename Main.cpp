@@ -1,17 +1,10 @@
 #include "Lexer.hpp"
+#include "Parser.hpp"
 
 int main()
 {
-    Lexer::getInstance()->readTextFile("flightGear.txt");
-    for (int i = 0; i <  Lexer::getInstance()->getAllLinesSplitByWord().size(); i++)
-    {
-        i = Parser::getInstance()->parsing(Lexer::getInstance()->getAllLinesSplitByWord()[i], i);
-    }
+    auto lexer = Lexer::getInstance();
+    lexer->readTextFile("flightGear.txt");
+    auto parser = Parser::getInstance();
+    parser->ran();
 }
-
-
-
-
-
-
-// g++ Database.cpp Commands.cpp Client.cpp Lexer.cpp  Parser.cpp ShuntingYard.cpp Server.cpp Main.cpp -pthread 
