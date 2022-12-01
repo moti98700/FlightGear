@@ -1,52 +1,32 @@
-#include "Lexer.hpp"
-#include "ShuntingYard.cpp"
-#include <unordered_map>
+#include <unistd.h>
+#include <iostream>
+#include "Commands.hpp"
+#include "Database.hpp"
+#include "Client.hpp"
+#include "Server.hpp"
+#include "CalculateExpression.hpp"
 
 using namespace std;
-double Command::getVarValue(string var)
-{
-    string varPath = Database::getInstance()->getVarTable()[var];
-    double varValue = Database::getInstance()->getSymbolTable()[varPath];
-    return varValue;
-}
 
-void Command::mathematicalExpression(const vector<string> &line, int start, string &mathematicalExpres)
-{
-    Database *db = Database::getInstance();
-    for (int j = start; j < line.size(); j++)
-    {
-
-        if (db->getSymbolTable().count(line[j]))
-        {
-            mathematicalExpres += to_string((db->getSymbolTable()[line[j]]));
-        }
-        else if (db->getVarTable().count(line[j]))
-        {
-            mathematicalExpres += to_string(getVarValue(line[j]));
-        }
-        else
-        {
-            mathematicalExpres += line[j];
-        }
-    }
-}
-
-void openServerCommand::doCommand(const vector<string> &line, int i)
+int OpenServerCommand::doCommand(const vector<string> &line, int i)
 {
     int port = stoi(line[1]);
     const char *ip = "127.0.0.1";
     Server::getInstance()->Connect(port, ip);
+    return i;
 }
 
-void connectCommand::doCommand(const vector<string> &line, int i)
+int ConnectCommand::doCommand(const vector<string> &line, int i)
 {
     int port = stoi(line[2]);
     const char *ip = "127.0.0.1";
     Client::getInstance()->Connect(port, ip);
+    return i;
 }
 
-void varCommand::doCommand(const vector<string> &line, int i)
+int VarCommand::doCommand(const vector<string> &line, int i)
 {
+    Database *db = Database::getInstance();
     if (line.size() > 3)
     {
         if (line[3] == "bind" && line[2] == "=" && line.size() > 4)
@@ -55,17 +35,14 @@ void varCommand::doCommand(const vector<string> &line, int i)
             string varPath = line[4];
             varPath.pop_back();
             varPath.erase(0, 1);
-            Database::getInstance()->setVarTable(line[1], varPath);
+            db->setVar(line[1], varPath);
             cout << line[1] << "Path: " << varPath << endl;
         }
 
         else if (line[2] == "=")
         {
-            string mathematicalExpres;
-            mathematicalExpression(line, 3, mathematicalExpres);
-            Calculator c;
-            double resultOfMathematicalExpressio = c.calculate(mathematicalExpres);
-            Database::getInstance()->setSymbolTable(line[1], resultOfMathematicalExpressio);
+            double resultOfExpression = calculateExpression(line, 3);
+            db->setSymbolTable(line[1], resultOfExpression);
         }
         else
         {
@@ -76,62 +53,10 @@ void varCommand::doCommand(const vector<string> &line, int i)
     {
         cout << "line: " + i << "invalid line" << endl;
     }
+    return i;
 }
 
-int whileCommand::sizeLoop;
-
-void whileCommand::doCommand(const vector<string> &line, int i)
-{
-    int loopEnd;
-    loopEnd = numberLineOfElementInTextFile(Lexer::getInstance()->getAllLinesSplitByWord(), "}", i);
-    vector<vector<string>> lineWhile;
-    for (int j = i + 1; j < loopEnd; j++)
-    {
-        lineWhile.push_back(Lexer::getInstance()->getAllLinesSplitByWord()[j]);
-    }
-    sizeLoop = lineWhile.size();
-
-    while (checkCondition(getVarValue(line[1]), line[2], line[3]))
-    {
-        for (int j = 0; j < lineWhile.size(); j++)
-        {
-            Parser::getInstance()->parsing(lineWhile[j], i);
-        }
-    }
-}
-
-int whileCommand::numberLineOfElementInTextFile(const vector<vector<string>> &allLinesSplitByWord, string element, int i)
-{
-    for (int j = i + 1; j < allLinesSplitByWord.size(); j++)
-    {
-        if (allLinesSplitByWord[j][0] == element)
-        {
-            return j;
-        }
-    }
-    return 0;
-}
-
-bool whileCommand::checkCondition(double x, string op, string yString)
-{
-    double y = stod(yString);
-    if ((op == "==") && (x == y))
-        return true;
-    else if ((op == "!=") && (x != y))
-        return true;
-    else if ((op == "<") && (x < y))
-        return true;
-    else if ((op == ">") && (x > y))
-        return true;
-    else if ((op == "<=") && (x <= y))
-        return true;
-    else if ((op == ">=") && (x >= y))
-        return true;
-    else
-        return false;
-}
-
-void printCommand::doCommand(const vector<string> &line, int i)
+int PrintCommand::doCommand(const vector<string> &line, int i)
 {
     if (line[1][0] == '"')
     {
@@ -145,31 +70,26 @@ void printCommand::doCommand(const vector<string> &line, int i)
         {
             ExpressionToPrint += line[i];
         }
-        string mathematicalExpres;
-        mathematicalExpression(line, 1, mathematicalExpres);
-        Calculator c;
-        double resultOfMathematicalExpressio = c.calculate(mathematicalExpres);
-        cout << ExpressionToPrint << " = " << resultOfMathematicalExpressio << endl;
+        double resultOfExpression = calculateExpression(line, 1);
+        cout << ExpressionToPrint << " = " << resultOfExpression << endl;
     }
+    return i;
 }
 
-void setCommand::doCommand(const vector<string> &line, int i)
+int SetCommand::doCommand(const vector<string> &line, int i)
 {
     if (line.size() > 2)
     {
         Database *db = Database::getInstance();
-        string mathematicalExpres;
-        mathematicalExpression(line, 2, mathematicalExpres);
-        Calculator c;
-        double resultOfMathematicalExpressio = c.calculate(mathematicalExpres);
-        if (db->getSymbolTable().count(line[0]))
+        double resultOfExpression = calculateExpression(line, 2);
+        if (db->containsSymbol(line[0]))
         {
-            db->setSymbolTable(line[0], resultOfMathematicalExpressio);
+            db->setSymbolTable(line[0], resultOfExpression);
         }
         else
         {
-            string set = "set " + db->getVarTable()[line[0]] + " " +
-                         to_string(resultOfMathematicalExpressio) + "\r\n";
+            string set = "set " + db->getVar(line[0]) + " " +
+                         to_string(resultOfExpression) + "\r\n";
             char *setChar = &set[0];
             Client::getInstance()->Send(setChar);
         }
@@ -178,16 +98,19 @@ void setCommand::doCommand(const vector<string> &line, int i)
     {
         cout << "line: " + i << "invalid line" << endl;
     }
+    return i;
 }
 
-void sleepCommand::doCommand(const vector<string> &line, int i)
+int SleepCommand::doCommand(const vector<string> &line, int i)
 {
     cout << "Waiting " << line[1] << " Milliseconds" << endl;
     int sleepValue = stoi(line[1]);
     sleep(sleepValue / 1000);
+    return i;
 }
 
-void unknownCommand::doCommand(const vector<string> &line, int i)
+int UnknownCommand::doCommand(const vector<string> &line, int i)
 {
     cout << "Unknown Command: " << line[0] << endl;
+    return i;
 }
