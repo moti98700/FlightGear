@@ -1,23 +1,26 @@
-#include "Commands.hpp"
+#include "ABCCommands.hpp"
+#include <string>
 #include <unordered_map>
-
-using namespace std;
 
 class Database
 {
 private:
-    Database() {buildCommandMap();}
+    Database(); 
     static Database *instance;
-    unordered_map<string, Command *> CommandMap;
-    unordered_map<string, double> SymbolTable;
-    unordered_map<string, string> VarTable;
+    std::unordered_map<std::string, Command *> CommandMap;
+    std::unordered_map<std::string, double> SymbolTable;
+    std::unordered_map<std::string, std::string> VarTable;
     void buildCommandMap();
 
 public:
-    void setSymbolTable(string,double);
-    void setVarTable(string varName,string varPath);
-    unordered_map<string, Command *> getCommandMap(){return CommandMap;}
-    unordered_map<string, double> getSymbolTable(){return SymbolTable;}
-    unordered_map<string, string> getVarTable(){return VarTable;}
+    void setSymbolTable(std::string const &, double);
+    void setVar(std::string const &varName, std::string varPath);
+    std::string getVar(std::string const &);
+    double getSymbole(std::string const &);
+    Command *getCommand(std::string const &);
+    double getVarValue(std::string const &);
+    bool containsSymbol(std::string const &);
+    bool containsMap(std::string const &);
+    bool containsVar(std::string const &);
     static Database *getInstance();
 };
