@@ -1,17 +1,26 @@
+#include <iostream>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <vector>
+#include <thread>
+#include "Server.hpp"
 #include "Database.hpp"
+
+using namespace std;
+
 Server *Server::instance = 0;
 Server *Server::getInstance()
 {
-	if (!instance) instance = new Server;
+	if (!instance)
+		instance = new Server;
 	return instance;
 }
-
-
 
 void Server::Connect(int port, const char *ip)
 {
 	t1 = thread(&Server::launchFG, this);
-	
+
 	cout << "Waiting for the Simulator..." << endl;
 
 	struct sockaddr_in address;
@@ -51,7 +60,6 @@ void Server::Connect(int port, const char *ip)
 		exit(EXIT_FAILURE);
 	}
 	t2 = thread(&Server::ListeningToSimulator, this);
-	// t1.detach() ;
 }
 
 void Server::launchFG()
@@ -66,36 +74,47 @@ void Server::ListeningToSimulator()
 	string buffer;
 	while (true)
 	{
+		bool ok = true;
 		buffer.clear();
-		c = {0}	;
-		while(c !='\n')
+		c = {0};
+		while (c != '\n')
 		{
-			valread = read(new_socket,&c, 1);
-			if(valread < 0){
+			valread = read(new_socket, &c, 1);
+			if (valread < 0)
+			{
+
+				ok = !ok;
 				break;
 			}
-			buffer += c;	
+			buffer += c;
 		}
-		buffer += '\0';
-		vector<double> values;
-		SplitLine(buffer,values);			
-		for (int i = 0; i < values.size(); i++)		
+
+		if (ok)
 		{
-			Database::getInstance()->setSymbolTable(paths[i],values[i]);	
+			vector<double> values;
+			SplitLine(buffer, values);
+			for (int i = 0; i < values.size(); i++)
+			{
+				Database::getInstance()->setSymbolTable(paths[i], values[i]);
+			}
 		}
 	}
 }
-void Server::SplitLine(string line,vector<double> &values) 		//split a line into words
-{	
+
+void Server::SplitLine(string line, vector<double> &values) // split a line into words
+{
 	string temp = "";
-	for(int i=0 ;i<line.length(); ++i)
+	for (int i = 0; i < line.length(); ++i)
 	{
-		if(line[i]==',')
+		if (line[i] == ',')
 		{
 			values.push_back(stod(temp));
 			temp = "";
 		}
-		else { temp.push_back(line[i]); }		
+		else
+		{
+			temp.push_back(line[i]);
+		}
 	}
-	values.push_back(stod(temp));	
+	values.push_back(stod(temp));
 };
