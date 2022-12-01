@@ -1,1 +1,1 @@
-# FlightGear2
+# FlightGear
